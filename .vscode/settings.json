@@ -1,0 +1,30 @@
+{
+    "go.buildTags": "wireinject,goexperiment.arenas",
+    "cSpell.words": [
+        "Cmds",
+        "dfs",
+        "disambiguates",
+        "endebnf",
+        "ent",
+        "Ents",
+        "fpos",
+        "goprojects",
+        "ig",
+        "impt",
+        "lname",
+        "pmezard",
+        "pset",
+        "pv",
+        "qf",
+        "rvangent",
+        "sbuf",
+        "Sel",
+        "startebnf",
+        "stk",
+        "sz",
+        "typeutil",
+        "unexport",
+        "Unparen",
+        "unvendored"
+    ]
+}
