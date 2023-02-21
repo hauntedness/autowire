@@ -18,11 +18,11 @@ func NewEvent(message *msg.Message) *Event {
 }
 
 func InitEventWithError() (*Event, error) {
-	panic(wire.Build(NewEvent, msg.NewMessage))
+	panic(wire.Build(NewEvent))
 }
 
 func InitEvent() *Event {
-	panic(wire.Build(NewEvent, msg.NewMessage))
+	panic(wire.Build(NewEvent))
 }
 
 func InitEventWithDummyReturn() *Event {
