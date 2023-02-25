@@ -7,7 +7,16 @@ require (
 	golang.org/x/tools v0.6.0
 )
 
-require github.com/dave/dst v0.27.2
+require (
+	github.com/dave/dst v0.27.2
+	github.com/stretchr/testify v1.8.1
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
 
 require (
 	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
