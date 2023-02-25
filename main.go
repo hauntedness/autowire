@@ -1,34 +1,37 @@
 package main
 
 import (
+	"errors"
 	"go/ast"
 	"go/types"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/dave/dst"
 	"github.com/dave/dst/decorator"
+	"github.com/huantedness/autowire/conf"
 	"golang.org/x/exp/slog"
-	"golang.org/x/tools/go/packages"
 )
 
 var (
-	log         *slog.Logger
 	errorType   = types.Universe.Lookup("error").Type()
 	cleanupType = types.NewSignature(nil, nil, nil, false)
-	conf        = &packages.Config{
-		BuildFlags: []string{"-tags=wireinject"},
-		Mode:       packages.NeedName | packages.NeedFiles | packages.NeedDeps | packages.NeedImports | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax,
-	}
 )
 
 func init() {
 	opts := slog.HandlerOptions{
-		AddSource:   true,
-		Level:       slog.LevelDebug,
-		ReplaceAttr: nil,
+		AddSource: false,
+		Level:     slog.LevelDebug,
+		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
+			if a.Key == "time" {
+				a.Value = slog.StringValue(a.Value.Time().Format(time.DateTime))
+			}
+			return a
+		},
 	}
-	log = slog.New(opts.NewTextHandler(os.Stdout))
+	log := slog.New(opts.NewTextHandler(os.Stdout))
+	slog.SetDefault(log)
 }
 
 func main() {
@@ -38,41 +41,35 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// check point 1
-	func() {
-		for _, t := range di.beans {
-			log.Debug("found bean", "type", t)
-		}
-		for _, v := range di.cache {
-			log.Debug("found cache", "value", v)
-		}
-		for _, v := range di.providers {
-			log.Debug("found provider", "value", v)
-		}
-		for _, v := range di.injectors {
-			log.Debug("found injector", "value", v)
-		}
-	}()
+	// // check point 1
+	// func() {
+	// 	for _, v := range di.providers {
+	// 		slog.Debug("found provider", "value", v)
+	// 	}
+	// 	for _, v := range di.injectors {
+	// 		slog.Debug("found injector", "value", v)
+	// 	}
+	// }()
 	di.RootSearch()
 }
 
 // DIContext entry to build injector quickly,
 // automatically find all necessary providers and then rewrite source with full provider set
 type DIContext struct {
-	beans     map[BeanID]types.Type
 	providers map[FuncId]*types.Func // only store function provider
 	injectors map[FuncId]*InjectorFunc
-	cache     map[BeanID]map[FuncId]*types.Func // to find provider and injector quickly
 	packages  map[PkgPath]*decorator.Package
+	objects   map[ObjectId]types.Object
+	funcs     map[FuncId]*types.Func
 }
 
 func NewDIContext() *DIContext {
 	return &DIContext{
-		beans:     map[BeanID]types.Type{},
 		providers: map[FuncId]*types.Func{},
 		injectors: map[FuncId]*InjectorFunc{},
-		cache:     map[BeanID]map[FuncId]*types.Func{},
 		packages:  map[PkgPath]*decorator.Package{},
+		objects:   make(map[ObjectId]types.Object, 100),
+		funcs:     make(map[FuncId]*types.Func, 100),
 	}
 }
 
@@ -81,7 +78,7 @@ func (di *DIContext) loadPackage(path PkgPath) (pkg *decorator.Package) {
 	if pkg != nil {
 		return
 	}
-	pkgs, err := decorator.Load(conf, string(path))
+	pkgs, err := decorator.Load(conf.DefaultConf, path)
 	if err != nil {
 		panic(err)
 	}
@@ -89,12 +86,31 @@ func (di *DIContext) loadPackage(path PkgPath) (pkg *decorator.Package) {
 		panic("can not load package " + path)
 	}
 	di.packages[path] = pkgs[0]
+	for _, obj := range di.packages[path].TypesInfo.Defs {
+		if obj != nil && obj.Pkg() != nil {
+			if named, ok := obj.Type().(*types.Named); ok {
+				// if the obj from other package, get the source pkg path
+				namedObj := named.Obj()
+				name := namedObj.Name()
+				if namedObj.Pkg() == nil {
+					// this happens on build in types such as error
+					continue
+				}
+				id := NewObjectIdFromPkg(namedObj.Pkg(), name)
+				// while currently we use obj value from current package
+				di.objects[id] = namedObj
+			} else {
+				id := ObjectId{pkg: obj.Pkg().Path(), str: obj.Type().String()}
+				di.objects[id] = obj
+			}
+		}
+	}
 	return pkgs[0]
 }
 
 // WalkLocalPackage load local injector and provider
 func (di *DIContext) LoadPackage(pkgPath PkgPath, config *LoadConfig) error {
-	pkg := di.loadPackage(PkgPath(pkgPath))
+	pkg := di.loadPackage(pkgPath)
 	for _, file := range pkg.Syntax {
 		for _, decl := range file.Decls {
 			if fd, ok := decl.(*dst.FuncDecl); ok {
@@ -115,14 +131,14 @@ func (di *DIContext) LoadPackage(pkgPath PkgPath, config *LoadConfig) error {
 
 // LoadInjector load fd as injector if it passes the validation
 func (di *DIContext) LoadInjector(fd *dst.FuncDecl, pkg *decorator.Package) error {
-	converted := revertToAstNode[*dst.FuncDecl, *ast.FuncDecl](fd, pkg)
+	converted := DstToAst[*dst.FuncDecl, *ast.FuncDecl](fd, pkg)
 	// wire.Build(NewEvent, msg.NewMessage)
 	callExpr, err := findInjectorBuild(pkg.TypesInfo, converted)
 	if err != nil {
 		return err
 	}
 	if callExpr == nil {
-		log.Info("not a builder", "fd", fd.Name)
+		slog.Info("not a builder", "fd", fd.Name)
 		return nil
 	}
 	fn := funcOf(fd, pkg)
@@ -152,9 +168,6 @@ func (di *DIContext) LoadProvider(fd *dst.FuncDecl, pkg *decorator.Package) {
 		return
 	}
 	di.addProvider(fn)
-	bean := outputSignature.out
-	di.addBean(bean)
-	di.addCache(bean, outputSignature, fn)
 }
 
 func (di *DIContext) addInjector(v *InjectorFunc) {
@@ -163,19 +176,6 @@ func (di *DIContext) addInjector(v *InjectorFunc) {
 
 func (di *DIContext) addProvider(fn *types.Func) {
 	di.providers[NewFuncID(fn)] = fn
-}
-
-func (di *DIContext) addCache(bean types.Type, outputSignature outputSignature, fn *types.Func) {
-	cached := di.cache[NewBeanID(bean)]
-	if cached == nil {
-		cached = make(map[FuncId]*types.Func)
-		cached[NewFuncID(fn)] = fn
-	}
-	di.cache[NewBeanID(bean)] = cached
-}
-
-func (di *DIContext) addBean(bean types.Type) {
-	di.beans[NewBeanID(bean)] = bean
 }
 
 // RootSearch find and make up incomplete injectors
@@ -197,11 +197,12 @@ func (di *DIContext) isWireReady(injectorFunc *InjectorFunc) bool {
 	// packagePath := fn.Pkg().Path()
 	// pkg := di.loadPackage(PkgPath(packagePath))
 	sig := injectorFunc.Func.Type().(*types.Signature)
+	type BeanID = string
 	providerFuncs := make(map[BeanID]*types.Signature)
 	for _, f := range injectorFunc.ProviderFuncs {
 		s := f.Type().(*types.Signature)
-		v := s.Results().At(0).Type()
-		providerFuncs[BeanID(v.String())] = s
+		out := s.Results().At(0).Type()
+		providerFuncs[BeanID(out.String())] = s
 	}
 	res := sig.Results().At(0).Type().String()
 	rootPath := BeanID(res)
@@ -222,36 +223,47 @@ func (di *DIContext) isWireReady(injectorFunc *InjectorFunc) bool {
 	return complete
 }
 
+func (di *DIContext) Get(id ObjectId) types.Object {
+	if di.packages[id.pkg] == nil {
+		di.LoadPackage(id.pkg, &LoadConfig{LoadMode: LoadProvder})
+	}
+	return di.objects[id]
+}
+
 func (di *DIContext) build(injector *InjectorFunc) {
 	// eg: NewEvent(*msg.Message)
-	// for each NewEvent provider
-	// find a message provider and refactor the code if message not present
+	funcSet := make(map[FuncId]*types.Func)
 	for _, f := range injector.ProviderFuncs {
+		// f something like NewEvent(*msg.Message)
 		params := f.Type().(*types.Signature).Params()
+		// check and add missing provider to funcSet
 		for i := 0; i < params.Len(); i++ {
+			// v something like *msg.Message or msg.SomeInterface
 			v := params.At(i)
-			path := injector.PkgPathAt(i)
-			conf := &LoadConfig{
-				LoadMode: LoadProvder,
+			id := FetchObjectId(v)
+			obj := di.Get(id)
+			if obj == nil {
+				slog.Debug(v.String(), v)
 			}
-			err := di.LoadPackage(PkgPath(path), conf)
-			if err != nil {
-				panic(err)
-			}
-			fn := di.Pick(v.Type())
-			injector.AddProvider(fn)
+			provider := di.FindProvider(obj)
+			funcSet[NewFuncID(provider)] = provider
 		}
+	}
+	for k := range funcSet {
+		slog.Info("find", "func id", k)
 	}
 }
 
-func (di *DIContext) Pick(typ types.Type) (provider *types.Func) {
-	beans := di.cache[NewBeanID(typ)]
-	for id, bean := range beans {
-		// local first
-		if strings.Contains(string(id), "") {
-			return bean
+func (di *DIContext) FindProvider(out types.Object) *types.Func {
+	for _, p := range di.providers {
+		v := p.Type().(*types.Signature).Results().At(0)
+		id := FetchObjectId(v)
+		obj := di.Get(id)
+		if types.Identical(out.Type(), obj.Type()) {
+			return p
 		}
-		provider = bean
 	}
-	return
+	slog.Error("FindProvider", errors.New("cound not find provider"), "out", out)
+	os.Exit(0)
+	return nil
 }

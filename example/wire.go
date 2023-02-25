@@ -7,11 +7,11 @@ import (
 	"github.com/huantedness/autowire/example/msg"
 )
 
-type Event struct {
-	Message *msg.Message
+type Event /* *types.Struct */ struct {
+	Message msg.Message /* *types.Named */
 }
 
-func NewEvent(message *msg.Message) *Event {
+func NewEvent(message msg.Message) *Event {
 	return &Event{
 		Message: message,
 	}
