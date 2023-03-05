@@ -23,7 +23,3 @@ func TestDIContext_Process(t *testing.T) {
 	injector := di.injectors[objRef{importPath: path, name: "InitShu"}]
 	assert.NotNil(t, injector)
 }
-
-// test multiple package
-func TestDIContext_Process2(t *testing.T) {
-}

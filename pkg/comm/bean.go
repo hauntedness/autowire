@@ -50,5 +50,8 @@ func (b *Bean) Identical(other *Bean) bool {
 	if types.Identical(b.typ, other.typ) {
 		return true
 	}
+	if b.String() == other.String() {
+		return true
+	}
 	return false
 }

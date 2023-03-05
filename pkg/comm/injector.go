@@ -61,3 +61,7 @@ func (inj *Injector) AddProvider(list ...*Provider) {
 		inj.providers[p.fn.String()] = p
 	}
 }
+
+func (inj *Injector) String() string {
+	return inj.fn.String()
+}
