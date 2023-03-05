@@ -1,4 +1,4 @@
-package types
+package comm
 
 import (
 	"go/types"
@@ -8,6 +8,10 @@ import (
 
 type Provider struct {
 	fn *types.Func
+}
+
+func NewProvider(fn *types.Func) *Provider {
+	return &Provider{fn: fn}
 }
 
 func (p *Provider) Need() []*Bean {
@@ -53,7 +57,7 @@ func (p *Provider) fromVar(v *types.Var) *Bean {
 		bean := &Bean{pkg: p.fn.Pkg().Path(), typ: typ}
 		return bean
 	default:
-		slog.Info("something impossible", typ)
+		slog.Warn("something impossible", "type", typ)
 		panic(typ)
 	}
 }

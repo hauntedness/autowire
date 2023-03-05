@@ -40,10 +40,10 @@ func InitEventWithWrongReturn() (*Event, func()) {
 // wire.go:
 
 type Event struct {
-	Message *msg.Message
+	Message msg.Message
 }
 
-func NewEvent(message *msg.Message) *Event {
+func NewEvent(message msg.Message) *Event {
 	return &Event{
 		Message: message,
 	}

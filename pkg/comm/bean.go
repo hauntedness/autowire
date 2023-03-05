@@ -1,4 +1,4 @@
-package types
+package comm
 
 import (
 	"go/types"
@@ -44,4 +44,11 @@ func kindOf(typ types.Type) BeanKind {
 	default:
 		return BuildInKind
 	}
+}
+
+func (b *Bean) Identical(other *Bean) bool {
+	if types.Identical(b.typ, other.typ) {
+		return true
+	}
+	return false
 }

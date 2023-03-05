@@ -1,4 +1,4 @@
-package types
+package comm
 
 import (
 	"go/types"
@@ -10,12 +10,12 @@ import (
 )
 
 func TestInjector_Need(t *testing.T) {
-	path := "github.com/huantedness/autowire/pkg/types/inj"
+	path := "github.com/huantedness/autowire/pkg/comm/inj"
 	pkgs, err := decorator.Load(conf.DefaultConf, path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	path_guan := "github.com/huantedness/autowire/pkg/types/inj/guan"
+	path_guan := "github.com/huantedness/autowire/pkg/comm/inj/guan"
 	pkg_guan, err := decorator.Load(conf.DefaultConf, path_guan)
 	if err != nil {
 		t.Fatal(err)
@@ -51,7 +51,7 @@ func TestInjector_Need(t *testing.T) {
 			injector.AddProvider(provider)
 		}
 	}
-	beans := injector.Need()
+	beans := injector.Require()
 	for _, bean := range beans {
 		slog.Info("Need", "Id", bean)
 	}

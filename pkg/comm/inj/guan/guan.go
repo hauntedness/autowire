@@ -1,6 +1,6 @@
 package guan
 
-import "github.com/huantedness/autowire/pkg/types/inj/zhang"
+import "github.com/huantedness/autowire/pkg/comm/inj/zhang"
 
 type Guan struct{}
 

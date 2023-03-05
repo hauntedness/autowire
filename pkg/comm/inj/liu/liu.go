@@ -1,6 +1,6 @@
 package liu
 
-import "github.com/huantedness/autowire/pkg/types/inj/guan"
+import "github.com/huantedness/autowire/pkg/comm/inj/guan"
 
 type Liu struct{}
 

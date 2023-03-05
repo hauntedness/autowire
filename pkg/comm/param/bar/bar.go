@@ -1,6 +1,6 @@
 package bar
 
-import "github.com/huantedness/autowire/pkg/types/param"
+import "github.com/huantedness/autowire/pkg/comm/param"
 
 type Bar struct{}
 
@@ -12,8 +12,8 @@ func (Bar) Do(text string) error {
 var _ param.Foo = (*Bar)(nil)
 
 func Handle(foo param.Foo, impl *param.FooImpl, bar Bar) error {
-	foo.Do("text")
-	impl.Do("text2")
-	bar.Do("text3")
-	return nil
+	_ = foo.Do("text")
+	_ = impl.Do("text2")
+	err := bar.Do("text3")
+	return err
 }

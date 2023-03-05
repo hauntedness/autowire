@@ -2,8 +2,8 @@ package inj
 
 import (
 	"github.com/google/wire"
-	"github.com/huantedness/autowire/pkg/types/inj/liu"
-	"github.com/huantedness/autowire/pkg/types/inj/zhao"
+	"github.com/huantedness/autowire/pkg/comm/inj/liu"
+	"github.com/huantedness/autowire/pkg/comm/inj/zhao"
 )
 
 type Shu struct{}

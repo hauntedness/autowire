@@ -1,4 +1,4 @@
-package types
+package comm
 
 import (
 	"go/types"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestFromVar(t *testing.T) {
-	pkgs, err := decorator.Load(conf.DefaultConf, "github.com/huantedness/autowire/pkg/types/param/bar")
+	pkgs, err := decorator.Load(conf.DefaultConf, "github.com/huantedness/autowire/pkg/comm/param/bar")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,14 +26,14 @@ func TestFromVar(t *testing.T) {
 	p := Provider{fn: handle}
 	beans := p.Need()
 	assert.Equal(t, InterfaceKind, beans[0].Kind())
-	assert.Equal(t, "github.com/huantedness/autowire/pkg/types/param", beans[0].PkgPath())
-	assert.Equal(t, "github.com/huantedness/autowire/pkg/types/param.Foo", beans[0].String())
+	assert.Equal(t, "github.com/huantedness/autowire/pkg/comm/param", beans[0].PkgPath())
+	assert.Equal(t, "github.com/huantedness/autowire/pkg/comm/param.Foo", beans[0].String())
 	assert.Equal(t, PointerKind, beans[1].Kind())
-	assert.Equal(t, "github.com/huantedness/autowire/pkg/types/param", beans[1].PkgPath())
-	assert.Equal(t, "*github.com/huantedness/autowire/pkg/types/param.FooImpl", beans[1].String())
+	assert.Equal(t, "github.com/huantedness/autowire/pkg/comm/param", beans[1].PkgPath())
+	assert.Equal(t, "*github.com/huantedness/autowire/pkg/comm/param.FooImpl", beans[1].String())
 	assert.Equal(t, StructKind, beans[2].Kind())
-	assert.Equal(t, "github.com/huantedness/autowire/pkg/types/param/bar", beans[2].PkgPath())
-	assert.Equal(t, "github.com/huantedness/autowire/pkg/types/param/bar.Bar", beans[2].String())
+	assert.Equal(t, "github.com/huantedness/autowire/pkg/comm/param/bar", beans[2].PkgPath())
+	assert.Equal(t, "github.com/huantedness/autowire/pkg/comm/param/bar.Bar", beans[2].String())
 	// only for test purpose, error should not be a valid bean
 	bean := p.Provide()
 	assert.Equal(t, InterfaceKind, bean.Kind())

@@ -1,4 +1,4 @@
-package types
+package comm
 
 import (
 	"go/types"
@@ -9,12 +9,28 @@ type FuncId = string
 // Injector store
 type Injector struct {
 	fn        *types.Func
-	providers map[FuncId]*Provider
+	origin    map[FuncId]*Provider // original providers from the injector source code
+	providers map[FuncId]*Provider // all providers after analyzed
+	auto      bool                 // whether autowire can fill up this provider
 }
 
 type BeanId = string
 
-func (inj *Injector) Need() map[BeanId]*Bean {
+// NewInjector
+func NewInjector(fn *types.Func, origin map[FuncId]*Provider, auto bool) *Injector {
+	copy := make(map[FuncId]*Provider)
+	for k, p := range origin {
+		copy[k] = p
+	}
+	return &Injector{
+		fn:        fn,
+		origin:    origin,
+		providers: copy,
+		auto:      auto,
+	}
+}
+
+func (inj *Injector) Require() map[BeanId]*Bean {
 	p := &Provider{fn: inj.fn}
 	bean := p.Provide()
 	required := make(map[BeanId]*Bean)

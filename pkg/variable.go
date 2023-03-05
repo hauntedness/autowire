@@ -1,4 +1,4 @@
-package types
+package pkg
 
 import "go/types"
 
