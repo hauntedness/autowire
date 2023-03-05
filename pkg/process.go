@@ -11,7 +11,7 @@ type DIContext struct {
 	pkgs      map[string]*decorator.Package
 	objects   map[objRef]types.Object
 	injectors map[objRef]*comm.Injector
-	providers map[objRef]*comm.Provider
+	providers map[objRef]*comm.Provider // here better be a map[BeanId]map[FuncId]*Provider
 }
 
 func NewDIContext() *DIContext {
@@ -32,17 +32,16 @@ func (di *DIContext) Process(path string) {
 	// load entry package
 	di.loadProviderAndInjector(pkg, config)
 
-	di.doInject()
+	// di.doInject()
 }
 
 // doInject process each injector,
 func (di *DIContext) doInject() {
 	for _, inj := range di.injectors {
 		// here mean all required is provided
-		for done := false; !done; {
+		for {
 			m := inj.Require()
 			if len(m) == 0 {
-				done = true
 				break
 			}
 			for _, bean := range m {
@@ -52,14 +51,13 @@ func (di *DIContext) doInject() {
 					di.pkgs[path] = pkg
 					di.loadProviderAndInjector(pkg, &LoadConfig{LoadMode: LoadProvider})
 				}
-				// TODO here to find a bean provider
+				// TODO here to find a proper bean provider
 				for _, p := range di.providers {
 					b := p.Provide()
 					if b.Identical(bean) {
 						inj.AddProvider(p)
 					}
 				}
-				done = false
 			}
 		}
 	}
