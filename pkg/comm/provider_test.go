@@ -24,7 +24,7 @@ func TestFromVar(t *testing.T) {
 		}
 	}
 	p := Provider{fn: handle}
-	beans := p.Need()
+	beans := p.Require()
 	assert.Equal(t, InterfaceKind, beans[0].Kind())
 	assert.Equal(t, "github.com/huantedness/autowire/pkg/comm/param", beans[0].PkgPath())
 	assert.Equal(t, "github.com/huantedness/autowire/pkg/comm/param.Foo", beans[0].String())

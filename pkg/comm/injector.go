@@ -40,7 +40,7 @@ func (inj *Injector) Require() map[BeanId]*Bean {
 	required := make(map[BeanId]*Bean)
 	owned := make(map[BeanId]*Bean)
 	for _, p := range inj.providers {
-		for _, b := range p.Need() {
+		for _, b := range p.Require() {
 			required[b.String()] = b
 		}
 		b := p.Provide()

@@ -14,7 +14,7 @@ func NewProvider(fn *types.Func) *Provider {
 	return &Provider{fn: fn}
 }
 
-func (p *Provider) Need() []*Bean {
+func (p *Provider) Require() []*Bean {
 	type BeanId = string
 	ret := make([]*Bean, 0, 3)
 	params := p.fn.Type().(*types.Signature).Params()
