@@ -30,6 +30,10 @@ func NewInjector(fn *types.Func, origin map[FuncId]*Provider, auto bool) *Inject
 	}
 }
 
+// Require report beans needed to found to complete the injection
+//
+//	if provider P provide in Injector I Bean B, then I does not require B
+//	else if No provider provide B, the injector I require B.
 func (inj *Injector) Require() map[BeanId]*Bean {
 	p := &Provider{fn: inj.fn}
 	bean := p.Provide()
