@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"fmt"
 	"go/types"
 
 	"github.com/dave/dst/decorator"
@@ -34,6 +35,8 @@ func (di *DIContext) Process(path string) {
 	di.loadProviderAndInjector(pkg, config)
 
 	di.doInject()
+
+	di.Refactor()
 }
 
 // doInject process each injector,
@@ -63,6 +66,20 @@ func (di *DIContext) doInject() {
 			}
 			if i == 100 {
 				slog.Warn("fail to find provider after tried 1000 times", "injector", inj)
+			}
+		}
+	}
+}
+
+func (di *DIContext) Refactor() {
+	for _, pkg := range di.pkgs {
+		for _, file := range pkg.Syntax {
+			for _, decl := range file.Decls {
+				fmt.Print(decl)
+				err := pkg.Save()
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
 	}
