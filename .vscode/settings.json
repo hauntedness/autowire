@@ -2,8 +2,10 @@
     "go.buildTags": "wireinject,goexperiment.arenas",
     "cSpell.words": [
         "Cmds",
+        "dbname",
         "dfs",
         "disambiguates",
+        "DSN",
         "endebnf",
         "ent",
         "Ents",
@@ -22,6 +24,7 @@
         "sbuf",
         "Sel",
         "Shu",
+        "sslmode",
         "startebnf",
         "stk",
         "sz",
