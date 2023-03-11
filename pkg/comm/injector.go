@@ -2,6 +2,8 @@ package comm
 
 import (
 	"go/types"
+
+	"github.com/dave/dst"
 )
 
 type FuncId = string
@@ -12,12 +14,13 @@ type Injector struct {
 	origin    map[FuncId]*Provider // original providers from the injector source code
 	providers map[FuncId]*Provider // all providers after analyzed
 	auto      bool                 // whether autowire can fill up this provider
+	buildCall *dst.CallExpr        // the syntax tree node on which all providers lying
 }
 
 type BeanId = string
 
 // NewInjector
-func NewInjector(fn *types.Func, origin map[FuncId]*Provider, auto bool) *Injector {
+func NewInjector(fn *types.Func, origin map[FuncId]*Provider, buildCall *dst.CallExpr, auto bool) *Injector {
 	copy := make(map[FuncId]*Provider)
 	for k, p := range origin {
 		copy[k] = p
@@ -27,6 +30,7 @@ func NewInjector(fn *types.Func, origin map[FuncId]*Provider, auto bool) *Inject
 		origin:    origin,
 		providers: copy,
 		auto:      auto,
+		buildCall: buildCall,
 	}
 }
 

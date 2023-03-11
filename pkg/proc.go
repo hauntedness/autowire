@@ -72,8 +72,8 @@ func (di *DIContext) loadInjector(pkg *decorator.Package, decl dst.Decl) {
 			importPath: fn.Pkg().Path(),
 			name:       fn.Name(),
 		}
-		// TODO add funcDecl and callExpr for refactor purpose
-		di.injectors[ref] = comm.NewInjector(fn, origin, auto)
+		dstExpr := pkg.Decorator.Dst.Nodes[callExpr].(*dst.CallExpr)
+		di.injectors[ref] = comm.NewInjector(fn, origin, dstExpr, auto)
 	}
 }
 
