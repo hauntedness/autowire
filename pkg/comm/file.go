@@ -30,6 +30,12 @@ func NewFile(dstFile *dst.File) *WireFile {
 	}
 }
 
+func (file *WireFile) AddInjector(list ...*Injector) {
+	for _, inj := range list {
+		file.injectors[inj.fn.String()] = inj
+	}
+}
+
 func (file *WireFile) Refactor() {
 	origin, current := file.imports()
 	defer file.organizeImports(origin, current)

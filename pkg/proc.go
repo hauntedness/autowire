@@ -38,14 +38,14 @@ func (di *DIContext) loadProviderAndInjector(pkg *decorator.Package, conf *LoadC
 	if conf.LoadMode.NeedMode(LoadInjector) {
 		for _, file := range pkg.Syntax {
 			for _, decl := range file.Decls {
-				di.loadInjector(pkg, decl)
+				di.loadInjector(pkg, file, decl)
 			}
 		}
 	}
 }
 
 // loadInjector find all injector in pkg and add them to context
-func (di *DIContext) loadInjector(pkg *decorator.Package, decl dst.Decl) {
+func (di *DIContext) loadInjector(pkg *decorator.Package, file *dst.File, decl dst.Decl) {
 	declAst := pkg.Decorator.Ast.Nodes[decl]
 	if funcDecl, ok := declAst.(*ast.FuncDecl); ok {
 		callExpr, err := findInjectorBuild(pkg.TypesInfo, funcDecl)
@@ -73,7 +73,15 @@ func (di *DIContext) loadInjector(pkg *decorator.Package, decl dst.Decl) {
 			name:       fn.Name(),
 		}
 		dstExpr := pkg.Decorator.Dst.Nodes[callExpr].(*dst.CallExpr)
-		di.injectors[ref] = comm.NewInjector(fn, origin, dstExpr, auto)
+		inj := comm.NewInjector(fn, origin, dstExpr, auto)
+		di.injectors[ref] = inj
+		fileRef := objRef{importPath: fn.Pkg().Path(), name: file.Name.Name}
+		wireFile := di.files[fileRef]
+		if wireFile == nil {
+			wireFile = comm.NewFile(file)
+			di.files[fileRef] = wireFile
+		}
+		wireFile.AddInjector(inj)
 	}
 }
 

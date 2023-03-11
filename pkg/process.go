@@ -12,6 +12,7 @@ import (
 type DIContext struct {
 	pkgs      map[string]*decorator.Package
 	objects   map[objRef]types.Object
+	files     map[objRef]*comm.WireFile
 	injectors map[objRef]*comm.Injector
 	providers map[objRef]*comm.Provider // here better be a map[BeanId]map[FuncId]*Provider
 }
@@ -20,6 +21,7 @@ func NewDIContext() *DIContext {
 	return &DIContext{
 		pkgs:      map[string]*decorator.Package{},
 		objects:   map[objRef]types.Object{},
+		files:     map[objRef]*comm.WireFile{},
 		injectors: map[objRef]*comm.Injector{},
 		providers: map[objRef]*comm.Provider{},
 	}
@@ -27,6 +29,7 @@ func NewDIContext() *DIContext {
 
 func (di *DIContext) Process(path string) {
 	pkg := loadPackage(path)
+	di.pkgs[path] = pkg
 	// parse
 	config := &LoadConfig{
 		LoadMode: LoadProvider | LoadInjector,
@@ -72,15 +75,12 @@ func (di *DIContext) doInject() {
 }
 
 func (di *DIContext) Refactor() {
-	for _, pkg := range di.pkgs {
-		for _, file := range pkg.Syntax {
-			for _, decl := range file.Decls {
-				fmt.Print(decl)
-				err := pkg.Save()
-				if err != nil {
-					panic(err)
-				}
-			}
-		}
+	for ref, file := range di.files {
+		fmt.Println(ref)
+		file.Refactor()
+	}
+	for k, p := range di.pkgs {
+		slog.Info("saving", "package", k)
+		p.Save()
 	}
 }

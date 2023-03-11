@@ -160,7 +160,6 @@ func newShuInjector(t *testing.T) (injPkg *decorator.Package, guanPkg *decorator
 	}
 	// for package
 	for _, f := range pkgs[0].Syntax {
-		dst.Print(f)
 		// find wire.go
 		if !strings.Contains(f.Name.Name, "inj") {
 			continue

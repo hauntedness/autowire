@@ -7,8 +7,8 @@ import (
 	"github.com/huantedness/autowire/example/msg"
 )
 
-type Event /* *types.Struct */ struct {
-	Message msg.Message /* *types.Named */
+type Event struct {
+	Message msg.Message
 }
 
 func NewEvent(message msg.Message) *Event {
@@ -16,21 +16,6 @@ func NewEvent(message msg.Message) *Event {
 		Message: message,
 	}
 }
-
-func InitEventWithError() (*Event, error) {
-	panic(wire.Build(NewEvent))
-}
-
 func InitEvent() *Event {
-	panic(wire.Build(NewEvent))
-}
-
-func InitEventWithDummyReturn() *Event {
-	wire.Build(NewEvent, msg.NewMessage)
-	return nil
-}
-
-func InitEventWithWrongReturn() (*Event, func()) {
-	wire.Build(NewEvent, msg.NewMessage)
-	return nil, nil
+	panic(wire.Build(NewEvent, msg.NewMessage))
 }

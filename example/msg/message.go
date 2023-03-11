@@ -1,18 +1,11 @@
 package msg
 
-type Message interface {
-	Text() string
-}
-
-var _ Message = (*message)(nil)
-
-type message struct{}
+type Message struct{}
 
 // Text implements Message
-func (*message) Text() string {
+func (*Message) Text() string {
 	panic("unimplemented")
 }
-
 func NewMessage() Message {
-	return &message{}
+	return Message{}
 }
