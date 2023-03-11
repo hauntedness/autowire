@@ -76,7 +76,7 @@ func (file *WireFile) organizeImports(origin util.BiMap[path, alias], current ut
 			Name: ident,
 			Path: &dst.BasicLit{
 				Kind:  token.STRING,
-				Value: `"` + path + `"`,
+				Value: strconv.Quote(path),
 				Decs:  dst.BasicLitDecorations{},
 			},
 			Decs: dst.ImportSpecDecorations{},

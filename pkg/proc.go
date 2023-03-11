@@ -59,11 +59,16 @@ func (di *DIContext) loadInjector(pkg *decorator.Package, file *dst.File, decl d
 		funcObj := pkg.TypesInfo.Defs[funcDecl.Name]
 		fn := funcObj.(*types.Func)
 		origin := make(map[string]*comm.Provider)
-		auto := true // whether autowire can fill up this provider
+		auto := true // whether apply autowire to this injector
 		for _, e := range callExpr.Args {
 			obj := pkg.TypesInfo.ObjectOf(util.Unwrap(e))
 			if f, ok := obj.(*types.Func); ok {
-				origin[f.String()] = comm.NewProvider(f)
+				p := comm.NewProvider(f)
+				origin[f.String()] = p
+				ref := objRef{importPath: p.Package(), name: p.Name()}
+				if _, ok := di.providers[ref]; !ok {
+					di.providers[ref] = p
+				}
 			} else {
 				auto = false
 			}
@@ -75,7 +80,10 @@ func (di *DIContext) loadInjector(pkg *decorator.Package, file *dst.File, decl d
 		dstExpr := pkg.Decorator.Dst.Nodes[callExpr].(*dst.CallExpr)
 		inj := comm.NewInjector(fn, origin, dstExpr, auto)
 		di.injectors[ref] = inj
-		fileRef := objRef{importPath: fn.Pkg().Path(), name: file.Name.Name}
+		f := pkg.Decorator.Ast.Nodes[file].(*ast.File)
+		fileName := pkg.Fset.File(f.Pos()).Name()
+		// TODO how to get correct file name?
+		fileRef := objRef{importPath: fn.Pkg().Path(), name: fileName}
 		wireFile := di.files[fileRef]
 		if wireFile == nil {
 			wireFile = comm.NewFile(file)

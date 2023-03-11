@@ -32,6 +32,18 @@ func (p *Provider) Provide() *Bean {
 	return bean
 }
 
+func (p *Provider) Name() string {
+	return p.fn.Name()
+}
+
+func (p *Provider) String() string {
+	return p.fn.String()
+}
+
+func (p *Provider) Package() string {
+	return p.fn.Pkg().Path()
+}
+
 // getBean convert param or result to Bean
 func (p *Provider) fromVar(v *types.Var) *Bean {
 	origin := v.Origin().Type()

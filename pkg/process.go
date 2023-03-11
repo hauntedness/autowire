@@ -39,7 +39,7 @@ func (di *DIContext) Process(path string) {
 
 	di.doInject()
 
-	di.Refactor()
+	di.refactor()
 }
 
 // doInject process each injector,
@@ -74,7 +74,7 @@ func (di *DIContext) doInject() {
 	}
 }
 
-func (di *DIContext) Refactor() {
+func (di *DIContext) refactor() {
 	for ref, file := range di.files {
 		fmt.Println(ref)
 		file.Refactor()

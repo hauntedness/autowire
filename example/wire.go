@@ -16,6 +16,7 @@ func NewEvent(message msg.Message) *Event {
 		Message: message,
 	}
 }
+
 func InitEvent() *Event {
 	panic(wire.Build(NewEvent, msg.NewMessage))
 }
