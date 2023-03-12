@@ -10,12 +10,12 @@ import (
 )
 
 func TestInjector_Need(t *testing.T) {
-	path := "github.com/huantedness/autowire/pkg/comm/inj"
+	path := "github.com/huantedness/autowire/example/inj"
 	pkgs, err := decorator.Load(conf.DefaultConf, path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	path_guan := "github.com/huantedness/autowire/pkg/comm/inj/guan"
+	path_guan := "github.com/huantedness/autowire/example/inj/guan"
 	pkg_guan, err := decorator.Load(conf.DefaultConf, path_guan)
 	if err != nil {
 		t.Fatal(err)

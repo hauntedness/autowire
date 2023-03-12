@@ -9,6 +9,7 @@ import (
 
 	"github.com/dave/dst"
 	"github.com/huantedness/autowire/pkg/util"
+	"golang.org/x/exp/slices"
 	"golang.org/x/exp/slog"
 )
 
@@ -36,9 +37,17 @@ func (file *WireFile) AddInjector(list ...*Injector) {
 	}
 }
 
+func (file *WireFile) Imports() []*dst.ImportSpec {
+	return file.file.Imports
+}
+
 func (file *WireFile) Refactor() {
-	origin, current := file.imports()
-	defer file.organizeImports(origin, current)
+	origin, current := file.collectImports()
+	defer func() {
+		// rewrite dst file with new imports
+		file.organizeImports(origin, current)
+		slog.Debug("package refactored", "origin imports", origin, "current imports", current)
+	}()
 	// for each refactor pointcut
 	for key, inj := range file.injectors {
 		call := inj.buildCall
@@ -53,17 +62,38 @@ func (file *WireFile) Refactor() {
 					// resolve build call
 					funcName := p.fn.Name()
 					// add to call expr
-					call.Args = append(call.Args, dst.NewIdent(path.Name()+"."+funcName))
+					ident := dst.NewIdent(funcName)
+					ident.Path = path.Path()
+					call.Args = append(call.Args, ident)
 				}
 			}
 		}
 	}
-	// rewrite dst file with new imports
-	slog.Info("package after refactor", current)
 }
 
 func (file *WireFile) organizeImports(origin util.BiMap[path, alias], current util.BiMap[path, alias]) {
-	for path, alias := range current.LMap() {
+	// find import spec position
+	var importDecl *dst.GenDecl
+Declarations:
+	for _, d := range file.file.Decls {
+		if decl, ok := d.(*dst.GenDecl); ok {
+			if _, ok := decl.Specs[0].(*dst.ImportSpec); ok {
+				importDecl = decl
+				break Declarations
+			}
+		}
+	}
+	type pair [2]string
+	var pairs []pair
+	for k, v := range current.LMap() {
+		pairs = append(pairs, pair{k, v})
+	}
+	slices.SortFunc(pairs, func(p1, p2 pair) bool {
+		return p1[0] < p2[0]
+	})
+	for _, v := range pairs {
+		path := v[0]
+		alias := v[1]
 		if _, ok := origin.GetByL(path); ok {
 			continue
 		}
@@ -81,11 +111,12 @@ func (file *WireFile) organizeImports(origin util.BiMap[path, alias], current ut
 			},
 			Decs: dst.ImportSpecDecorations{},
 		}
+		importDecl.Specs = append(importDecl.Specs, spec)
 		file.file.Imports = append(file.file.Imports, spec)
 	}
 }
 
-func (file *WireFile) imports() (origin util.BiMap[path, alias], current util.BiMap[path, alias]) {
+func (file *WireFile) collectImports() (origin util.BiMap[path, alias], current util.BiMap[path, alias]) {
 	origin = util.NewBiMap[path, alias]()
 	current = util.NewBiMap[path, alias]()
 	for i, is := range file.file.Imports {

@@ -21,7 +21,7 @@ func TestBean_Identical(t *testing.T) {
 }
 
 func prepareBean(t *testing.T) *Bean {
-	pkgs, err := decorator.Load(conf.DefaultConf, "github.com/huantedness/autowire/pkg/comm/param/bar")
+	pkgs, err := decorator.Load(conf.DefaultConf, "github.com/huantedness/autowire/example/param/bar")
 	if err != nil {
 		t.Fatal(err)
 	}

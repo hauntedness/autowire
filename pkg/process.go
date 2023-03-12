@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"go/types"
 
 	"github.com/dave/dst/decorator"
@@ -75,12 +74,16 @@ func (di *DIContext) doInject() {
 }
 
 func (di *DIContext) refactor() {
-	for ref, file := range di.files {
-		fmt.Println(ref)
+	for _, file := range di.files {
 		file.Refactor()
 	}
-	for k, p := range di.pkgs {
-		slog.Info("saving", "package", k)
-		p.Save()
+	for path, pkg := range di.pkgs {
+		if path == "github.com/huantedness/autowire/example/inj" {
+			slog.Info("saving", "package", path)
+			err := pkg.Save()
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
 }
