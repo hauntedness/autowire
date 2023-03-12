@@ -1,6 +1,7 @@
 package comm
 
 import (
+	"fmt"
 	"go/types"
 
 	"github.com/dave/dst"
@@ -36,7 +37,7 @@ func NewInjector(fn *types.Func, origin map[FuncId]*Provider, buildCall *dst.Cal
 
 // Require report beans needed to found to complete the injection
 //
-//	if provider P provide in Injector I Bean B, then I does not require B
+//	if provider P in Injector I provide Bean B, then I does not require B
 //	else if No provider provide B, the injector I require B.
 func (inj *Injector) Require() map[BeanId]*Bean {
 	p := &Provider{fn: inj.fn}
@@ -49,12 +50,13 @@ func (inj *Injector) Require() map[BeanId]*Bean {
 		}
 		b := p.Provide()
 		owned[b.String()] = b
-		if bean != nil && types.Identical(b.typ, bean.typ) {
+		if bean != nil && b.Identical(bean) {
 			bean = nil
 		}
 	}
 	if bean != nil {
-		panic("at least one provider return same type as injector func result")
+		err := fmt.Errorf("error: the injector func need %v, the corresponding provider should be in wire.Build func", bean.String())
+		panic(err)
 	}
 	for beanId := range required {
 		if _, ok := owned[beanId]; ok {

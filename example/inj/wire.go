@@ -22,8 +22,7 @@ func InitShu() *Shu {
 	return nil
 }
 
-// TODO Bug: here result in a bug
-// func InitZhao() *zhao.Zhao {
-// 	wire.Build(guan.NewGuan)
-// 	return nil
-// }
+func InitZhao() *guan.Guan {
+	wire.Build(guan.NewGuan, yanyan.NewYanYan, zhang.NewZhang)
+	return nil
+}

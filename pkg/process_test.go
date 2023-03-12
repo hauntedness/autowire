@@ -33,6 +33,7 @@ func TestDIContext_Process2(t *testing.T) {
 	path := "github.com/huantedness/autowire/example/inj"
 	di.Process(path)
 
+	// TODO here might be a bug, please test both pointer bean and struct value bean
 	assert.NotEmpty(t, di.objects)
 	bean := di.objects[objRef{importPath: path, name: "Liu"}]
 	assert.NotNil(t, bean)

@@ -78,12 +78,10 @@ func (di *DIContext) refactor() {
 		file.Refactor()
 	}
 	for path, pkg := range di.pkgs {
-		if path == "github.com/huantedness/autowire/example/inj" {
-			slog.Info("saving", "package", path)
-			err := pkg.Save()
-			if err != nil {
-				panic(err)
-			}
+		slog.Info("saving", "package", path)
+		err := pkg.Save()
+		if err != nil {
+			panic(err)
 		}
 	}
 }
