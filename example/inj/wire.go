@@ -22,7 +22,7 @@ func InitShu() *Shu {
 	return nil
 }
 
-func InitZhao() *guan.Guan {
+func InitGuan() *guan.Guan {
 	wire.Build(guan.NewGuan, yanyan.NewYanYan, zhang.NewZhang)
 	return nil
 }
