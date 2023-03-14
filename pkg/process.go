@@ -94,8 +94,8 @@ func (di *DIContext) refactor() {
 		file.Refactor()
 	}
 	for path, pkg := range di.pkgs {
-		logs.Debug("saving", "package", path)
 		if di.conf.RewriteSource {
+			logs.Debug("saving", "package", path)
 			err := pkg.Save()
 			if err != nil {
 				panic(err)
