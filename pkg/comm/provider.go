@@ -3,7 +3,7 @@ package comm
 import (
 	"go/types"
 
-	"golang.org/x/exp/slog"
+	"github.com/huantedness/autowire/logs"
 )
 
 type Provider struct {
@@ -18,7 +18,7 @@ func (p *Provider) Require() []*Bean {
 	type BeanId = string
 	ret := make([]*Bean, 0, 3)
 	params := p.fn.Type().(*types.Signature).Params()
-	for i := 0; i < params.Len(); i++ {
+	for i := range make([]struct{}, params.Len()) {
 		v := params.At(i)
 		bean := p.fromVar(v)
 		ret = append(ret, bean)
@@ -69,7 +69,7 @@ func (p *Provider) fromVar(v *types.Var) *Bean {
 		bean := &Bean{pkg: p.fn.Pkg().Path(), typ: typ}
 		return bean
 	default:
-		slog.Warn("something impossible", "type", typ)
+		logs.Warn("something should not happen!", "type", typ)
 		panic(typ)
 	}
 }

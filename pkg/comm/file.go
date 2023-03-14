@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/dave/dst"
+	"github.com/huantedness/autowire/logs"
 	"github.com/huantedness/autowire/pkg/util"
 	"golang.org/x/exp/slices"
-	"golang.org/x/exp/slog"
 )
 
 type (
@@ -46,12 +46,11 @@ func (file *WireFile) Refactor() {
 	defer func() {
 		// rewrite dst file with new imports
 		file.organizeImports(origin, current)
-		slog.Debug("package refactored", "origin imports", origin, "current imports", current)
+		logs.Debug("package refactored", "origin imports", origin, "current imports", current)
 	}()
 	// for each refactor pointcut
-	for key, inj := range file.injectors {
+	for _, inj := range file.injectors {
 		call := inj.buildCall
-		inj := file.injectors[key]
 		// if injector need to be refactored
 		if inj.auto && len(inj.origin) < len(inj.providers) {
 			for k, p := range inj.providers {
@@ -121,7 +120,7 @@ func (file *WireFile) collectImports() (origin util.BiMap[path, alias], current 
 	current = util.NewBiMap[path, alias]()
 	for i, is := range file.file.Imports {
 		var name string
-		slog.Info(
+		logs.Info(
 			"import path",
 			"index", i,
 			"name", is.Name,
@@ -176,7 +175,7 @@ func renamed(bm util.BiMap[path, alias], path path, name alias) alias {
 		}
 	}
 
-	for i := 0; i < 255; i++ {
+	for i := range [255]struct{}{} {
 		newAlias := append([]byte(string(secondLast)), name...)
 		if i > 0 {
 			newAlias = append(newAlias, []byte(strconv.Itoa(i))...)

@@ -2,24 +2,40 @@ package pkg
 
 import (
 	"go/types"
+	"strings"
 
 	"github.com/dave/dst/decorator"
+	"github.com/huantedness/autowire/logs"
 	"github.com/huantedness/autowire/pkg/comm"
-	"golang.org/x/exp/slog"
 )
 
-type DIContext struct {
-	pkgs      map[string]*decorator.Package
-	objects   map[objRef]types.Object
-	files     map[objRef]*comm.WireFile
-	injectors map[objRef]*comm.Injector
-	providers map[objRef]*comm.Provider // here better be a map[BeanId]map[FuncId]*Provider
+type ProcessConfig struct {
+	RewriteSource     bool
+	ProviderPredicate func(fn *types.Func) bool // used to report whether a function can be provider
 }
 
-func NewDIContext() *DIContext {
+var defaultProcessConfig = &ProcessConfig{
+	RewriteSource: false,
+	ProviderPredicate: func(fn *types.Func) bool {
+		return strings.HasPrefix(fn.Name(), "New")
+	},
+}
+
+type DIContext struct {
+	conf      *ProcessConfig
+	pkgs      map[string]*decorator.Package
+	files     map[objRef]*comm.WireFile
+	injectors map[objRef]*comm.Injector
+	providers map[objRef]*comm.Provider // maybe here better be a map[BeanId]map[FuncId]*Provider
+}
+
+func NewDIContext(conf *ProcessConfig) *DIContext {
+	if conf == nil {
+		conf = defaultProcessConfig
+	}
 	return &DIContext{
+		conf:      conf,
 		pkgs:      map[string]*decorator.Package{},
-		objects:   map[objRef]types.Object{},
 		files:     map[objRef]*comm.WireFile{},
 		injectors: map[objRef]*comm.Injector{},
 		providers: map[objRef]*comm.Provider{},
@@ -45,7 +61,7 @@ func (di *DIContext) Process(path string) {
 func (di *DIContext) doInject() {
 	for _, inj := range di.injectors {
 		// here mean all required is provided
-		for i := 0; i < 100; i++ {
+		for i := range [100]struct{}{} {
 			m := inj.Require()
 			if len(m) == 0 {
 				break
@@ -60,14 +76,14 @@ func (di *DIContext) doInject() {
 				// TODO here to find a proper bean provider
 				for _, p := range di.providers {
 					b := p.Provide()
-					slog.Info("compare", "b", b.String(), "bean", bean.String())
+					logs.Debug("compare", "b", b.String(), "bean", bean.String())
 					if b.Identical(bean) {
 						inj.AddProvider(p)
 					}
 				}
 			}
 			if i == 100 {
-				slog.Warn("fail to find provider after tried 1000 times", "injector", inj)
+				logs.Warn("fail to find provider after tried 1000 times", "injector", inj)
 			}
 		}
 	}
@@ -78,10 +94,12 @@ func (di *DIContext) refactor() {
 		file.Refactor()
 	}
 	for path, pkg := range di.pkgs {
-		slog.Info("saving", "package", path)
-		err := pkg.Save()
-		if err != nil {
-			panic(err)
+		logs.Debug("saving", "package", path)
+		if di.conf.RewriteSource {
+			err := pkg.Save()
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }

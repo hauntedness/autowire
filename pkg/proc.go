@@ -3,7 +3,6 @@ package pkg
 import (
 	"go/ast"
 	"go/types"
-	"strings"
 
 	"github.com/dave/dst"
 	"github.com/dave/dst/decorator"
@@ -26,12 +25,6 @@ func (di *DIContext) loadProviderAndInjector(pkg *decorator.Package, conf *LoadC
 		if id == nil || obj == nil {
 			continue
 		}
-		ref := objRef{
-			importPath: obj.Pkg().Path(),
-			name:       obj.Name(),
-		}
-		// add objects
-		di.objects[ref] = obj
 		di.loadProvider(obj)
 
 	}
@@ -46,6 +39,7 @@ func (di *DIContext) loadProviderAndInjector(pkg *decorator.Package, conf *LoadC
 
 // loadInjector find all injector in pkg and add them to context
 func (di *DIContext) loadInjector(pkg *decorator.Package, file *dst.File, decl dst.Decl) {
+	// TODO check wireinjector build tag
 	dec := pkg.Decorator
 	if funcDecl, ok := dec.Ast.Nodes[decl].(*ast.FuncDecl); ok {
 		callExpr, err := findInjectorBuild(pkg.TypesInfo, funcDecl)
@@ -97,7 +91,7 @@ func (di *DIContext) loadProvider(obj types.Object) {
 		switch obj.Type().(type) {
 		case *types.Signature:
 			// possibly a provider
-			if strings.HasPrefix(fn.Name(), "New") {
+			if di.conf.ProviderPredicate(fn) {
 				ref := objRef{
 					importPath: obj.Pkg().Path(),
 					name:       obj.Name(),

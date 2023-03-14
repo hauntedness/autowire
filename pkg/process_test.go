@@ -7,13 +7,9 @@ import (
 )
 
 func TestDIContext_Process(t *testing.T) {
-	di := NewDIContext()
+	di := NewDIContext(nil)
 	path := "github.com/huantedness/autowire/example"
 	di.Process(path)
-
-	assert.NotEmpty(t, di.objects)
-	bean := di.objects[objRef{importPath: path, name: "Event"}]
-	assert.NotNil(t, bean)
 
 	assert.NotEmpty(t, di.providers)
 	provider := di.providers[objRef{importPath: path, name: "NewEvent"}]
@@ -29,14 +25,9 @@ func TestDIContext_Process(t *testing.T) {
 
 // test complex dependencies, to see yanyan which is in very underlayer can be enriched
 func TestDIContext_Process2(t *testing.T) {
-	di := NewDIContext()
+	di := NewDIContext(nil)
 	path := "github.com/huantedness/autowire/example/inj"
 	di.Process(path)
-
-	// TODO here might be a bug, please test both pointer bean and struct value bean
-	assert.NotEmpty(t, di.objects)
-	bean := di.objects[objRef{importPath: path, name: "Liu"}]
-	assert.NotNil(t, bean)
 
 	assert.NotEmpty(t, di.providers)
 	provider := di.providers[objRef{importPath: path, name: "NewShu"}]
