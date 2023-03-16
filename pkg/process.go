@@ -2,36 +2,40 @@ package pkg
 
 import (
 	"go/types"
-	"strings"
 
 	"github.com/dave/dst/decorator"
 	"github.com/huantedness/autowire/logs"
 	"github.com/huantedness/autowire/pkg/comm"
 )
 
-type ProcessConfig struct {
-	RewriteSource     bool
-	ProviderPredicate func(fn *types.Func) bool // used to report whether a function can be provider
-}
+// optional config when processing autowire
+type ProcessConfigurer interface {
+	//
+	// whether to rewrite source code
+	WillRewriteSource() bool
 
-var defaultProcessConfig = &ProcessConfig{
-	RewriteSource: false,
-	ProviderPredicate: func(fn *types.Func) bool {
-		return strings.HasPrefix(fn.Name(), "New")
-	},
+	// used to report whether a function is an injector
+	// this is helpful when you only want to generate a part of functions in the package
+	InjectorPredicate(fn *types.Func) bool
+
+	// used to report whether a function can be provider
+	ProviderPredicate(fn *types.Func) bool
+
+	// used to find proper provider from multiple ones
+	ProviderElect(inj *comm.Injector, bean *comm.Bean, providers map[string]*comm.Provider) *comm.Provider
 }
 
 type DIContext struct {
-	conf      *ProcessConfig
+	conf      ProcessConfigurer
 	pkgs      map[string]*decorator.Package
 	files     map[objRef]*comm.WireFile
 	injectors map[objRef]*comm.Injector
 	providers map[objRef]*comm.Provider // maybe here better be a map[BeanId]map[FuncId]*Provider
 }
 
-func NewDIContext(conf *ProcessConfig) *DIContext {
+func NewDIContext(conf ProcessConfigurer) *DIContext {
 	if conf == nil {
-		conf = defaultProcessConfig
+		conf = &DefaultProcessConfigurer{willRewriteSource: true}
 	}
 	return &DIContext{
 		conf:      conf,
@@ -61,7 +65,7 @@ func (di *DIContext) Process(path string) {
 func (di *DIContext) doInject() {
 	for _, inj := range di.injectors {
 		// here mean all required is provided
-		for i := range [100]struct{}{} {
+		for range [1000]struct{}{} {
 			m := inj.Require()
 			if len(m) == 0 {
 				break
@@ -73,17 +77,16 @@ func (di *DIContext) doInject() {
 					di.pkgs[path] = pkg
 					di.loadProviderAndInjector(pkg, &LoadConfig{LoadMode: LoadProvider})
 				}
-				// TODO here to find a proper bean provider
+				candidates := make(map[string]*comm.Provider)
+				// TODO here we need more efficient way
 				for _, p := range di.providers {
 					b := p.Provide()
-					logs.Debug("compare", "b", b.String(), "bean", bean.String())
 					if b.Identical(bean) {
-						inj.AddProvider(p)
+						candidates[p.String()] = p
 					}
 				}
-			}
-			if i == 100 {
-				logs.Warn("fail to find provider after tried 1000 times", "injector", inj)
+				p := di.conf.ProviderElect(inj, bean, candidates)
+				inj.AddProvider(p)
 			}
 		}
 	}
@@ -94,8 +97,8 @@ func (di *DIContext) refactor() {
 		file.Refactor()
 	}
 	for path, pkg := range di.pkgs {
-		if di.conf.RewriteSource {
-			logs.Debug("saving", "package", path)
+		if di.conf.WillRewriteSource() {
+			logs.Debug("saving package", "package", path)
 			err := pkg.Save()
 			if err != nil {
 				panic(err)

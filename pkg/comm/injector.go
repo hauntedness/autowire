@@ -75,3 +75,7 @@ func (inj *Injector) AddProvider(list ...*Provider) {
 func (inj *Injector) String() string {
 	return inj.fn.String()
 }
+
+func (inj *Injector) Package() string {
+	return inj.fn.Pkg().Path()
+}

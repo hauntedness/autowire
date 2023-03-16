@@ -57,7 +57,7 @@ func (file *WireFile) Refactor() {
 				if inj.origin[k] == nil {
 					// resolve import path
 					path := p.fn.Pkg()
-					maybeImport(current, path)
+					takeImport(current, path)
 					// resolve build call
 					funcName := p.fn.Name()
 					// add to call expr
@@ -73,12 +73,12 @@ func (file *WireFile) Refactor() {
 func (file *WireFile) organizeImports(origin util.BiMap[path, alias], current util.BiMap[path, alias]) {
 	// find import spec position
 	var importDecl *dst.GenDecl
-Declarations:
+declarations:
 	for _, d := range file.file.Decls {
 		if decl, ok := d.(*dst.GenDecl); ok {
 			if _, ok := decl.Specs[0].(*dst.ImportSpec); ok {
 				importDecl = decl
-				break Declarations
+				break declarations
 			}
 		}
 	}
@@ -120,7 +120,7 @@ func (file *WireFile) collectImports() (origin util.BiMap[path, alias], current 
 	current = util.NewBiMap[path, alias]()
 	for i, is := range file.file.Imports {
 		var name string
-		logs.Info(
+		logs.Debug(
 			"import path",
 			"index", i,
 			"name", is.Name,
@@ -141,7 +141,7 @@ func (file *WireFile) collectImports() (origin util.BiMap[path, alias], current 
 	return origin, current
 }
 
-func maybeImport(bm util.BiMap[path, alias], pkg *types.Package) {
+func takeImport(bm util.BiMap[path, alias], pkg *types.Package) {
 	// rename if conflict package alias
 	alias := renamed(bm, pkg.Path(), pkg.Name())
 	bm.Put(pkg.Path(), alias)

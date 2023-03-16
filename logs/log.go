@@ -10,7 +10,7 @@ import (
 func init() {
 	opts := slog.HandlerOptions{
 		AddSource: false,
-		Level:     slog.LevelDebug,
+		Level:     defaultLevel,
 		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
 			if a.Key == "time" {
 				a.Value = slog.StringValue(a.Value.Time().Format(time.DateTime))

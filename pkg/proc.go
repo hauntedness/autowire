@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"go/ast"
+	"go/build/constraint"
 	"go/types"
 
 	"github.com/dave/dst"
@@ -41,6 +42,13 @@ func (di *DIContext) loadProviderAndInjector(pkg *decorator.Package, conf *LoadC
 func (di *DIContext) loadInjector(pkg *decorator.Package, file *dst.File, decl dst.Decl) {
 	// TODO check wireinjector build tag
 	dec := pkg.Decorator
+	dst.Print(file)
+	astFile := dec.Ast.Nodes[file].(*ast.File)
+	if ok := checkBuildConstraint(astFile); !ok {
+		return
+	}
+
+	decl.Decorations()
 	if funcDecl, ok := dec.Ast.Nodes[decl].(*ast.FuncDecl); ok {
 		callExpr, err := findInjectorBuild(pkg.TypesInfo, funcDecl)
 		if err != nil {
@@ -88,19 +96,57 @@ func (di *DIContext) loadInjector(pkg *decorator.Package, file *dst.File, decl d
 func (di *DIContext) loadProvider(obj types.Object) {
 	switch fn := obj.(type) {
 	case *types.Func:
-		switch obj.Type().(type) {
+		switch sig := obj.Type().(type) {
 		case *types.Signature:
-			// possibly a provider
-			if di.conf.ProviderPredicate(fn) {
-				ref := objRef{
-					importPath: obj.Pkg().Path(),
-					name:       obj.Name(),
-				}
-				di.providers[ref] = comm.NewProvider(fn)
+			// just possibly a provider, so use wire validate the func
+			_, err := funcOutput(sig)
+			if err != nil {
+				return
 			}
+			// and of course, we have our own validate func
+			if !di.conf.ProviderPredicate(fn) {
+				return
+			}
+			ref := objRef{
+				importPath: obj.Pkg().Path(),
+				name:       obj.Name(),
+			}
+			di.providers[ref] = comm.NewProvider(fn)
 		default:
 		}
 	default:
 	}
 	return
+}
+
+func checkBuildConstraint(file *ast.File) bool {
+	var comments []string
+	if len(file.Comments) > 0 {
+		for _, cg := range file.Comments {
+			for _, c := range cg.List {
+				comments = append(comments, c.Text)
+			}
+		}
+	}
+	if file.Doc != nil {
+		for _, comment := range file.Doc.List {
+			comments = append(comments, comment.Text)
+		}
+	}
+	ok := false
+	// only process go:build
+	for i := range comments {
+		fileTag, err := constraint.Parse(comments[i])
+		if err != nil {
+			continue
+		}
+		fileTag.Eval(func(tag string) bool {
+			if tag == "wireinject" {
+				ok = true
+			}
+			return true
+		})
+	}
+
+	return ok
 }
