@@ -17,13 +17,7 @@ func NewShu(liu *liu.Liu, zhao *zhao.Zhao) *Shu {
 	return &Shu{}
 }
 
-// hahaha
 func InitShu() *Shu {
-	wire.Build(NewShu, zhang.NewZhang, yanyan.NewYanYan, zhao.NewZhao, liu.NewLiu, guan.NewGuan)
-	return nil
-}
-
-func InitGuan() *guan.Guan {
-	wire.Build(guan.NewGuan, yanyan.NewYanYan, zhang.NewZhang)
+	wire.Build(NewShu, yanyan.NewYanYan, liu.NewLiu, zhao.NewZhao, guan.NewGuan, zhang.NewZhang)
 	return nil
 }
