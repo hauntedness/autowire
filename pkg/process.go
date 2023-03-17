@@ -1,29 +1,10 @@
 package pkg
 
 import (
-	"go/types"
-
 	"github.com/dave/dst/decorator"
 	"github.com/huantedness/autowire/logs"
 	"github.com/huantedness/autowire/pkg/comm"
 )
-
-// optional config when processing autowire
-type ProcessConfigurer interface {
-	//
-	// whether to rewrite source code
-	WillRewriteSource() bool
-
-	// used to report whether a function is an injector
-	// this is helpful when you only want to generate a part of functions in the package
-	InjectorPredicate(fn *types.Func) bool
-
-	// used to report whether a function can be provider
-	ProviderPredicate(fn *types.Func) bool
-
-	// used to find proper provider from multiple ones
-	ProviderElect(inj *comm.Injector, bean *comm.Bean, providers map[string]*comm.Provider) *comm.Provider
-}
 
 type DIContext struct {
 	conf      ProcessConfigurer
