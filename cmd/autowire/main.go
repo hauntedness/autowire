@@ -10,11 +10,6 @@ import (
 )
 
 func main() {
-	path := `C:\Users\hauntedness\NvimProjects\goprojects\autowire\example\inj`
-	err := os.Chdir(path)
-	if err != nil {
-		panic(err)
-	}
 	opts := slog.HandlerOptions{
 		AddSource: false,
 		Level:     slog.LevelInfo,
