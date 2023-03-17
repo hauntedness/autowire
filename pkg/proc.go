@@ -42,7 +42,6 @@ func (di *DIContext) loadProviderAndInjector(pkg *decorator.Package, conf *LoadC
 func (di *DIContext) loadInjector(pkg *decorator.Package, file *dst.File, decl dst.Decl) {
 	// TODO check wireinjector build tag
 	dec := pkg.Decorator
-	dst.Print(file)
 	astFile := dec.Ast.Nodes[file].(*ast.File)
 	if ok := checkBuildConstraint(astFile); !ok {
 		return
@@ -86,7 +85,7 @@ func (di *DIContext) loadInjector(pkg *decorator.Package, file *dst.File, decl d
 		fileRef := objRef{importPath: fn.Pkg().Path(), name: fileName}
 		wireFile := di.files[fileRef]
 		if wireFile == nil {
-			wireFile = comm.NewFile(file)
+			wireFile = comm.NewFile(file, fn.Pkg().Path())
 			di.files[fileRef] = wireFile
 		}
 		wireFile.AddInjector(inj)
@@ -116,7 +115,6 @@ func (di *DIContext) loadProvider(obj types.Object) {
 		}
 	default:
 	}
-	return
 }
 
 func checkBuildConstraint(file *ast.File) bool {

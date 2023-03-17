@@ -48,7 +48,7 @@ func (*DefaultProcessConfigurer) ProviderElect(inj *comm.Injector, bean *comm.Be
 		slices.SortFunc(secondSequence, sortFunc)
 		return secondSequence[0]
 	}
-	panic(fmt.Errorf("no provider given")) //  not reachable code or this will be treated as a bug
+	panic(fmt.Errorf("no provider given")) // not reachable code or this will be treated as a bug
 }
 
 // ProviderPredicate implements ProcessConfigurer
@@ -56,7 +56,7 @@ func (*DefaultProcessConfigurer) ProviderPredicate(fn *types.Func) bool {
 	return strings.HasPrefix(fn.Name(), "New")
 }
 
-// RewriteSource implements ProcessConfigurer
+// WillRewriteSource implements ProcessConfigurer
 func (c *DefaultProcessConfigurer) WillRewriteSource() bool {
 	return c.willRewriteSource
 }

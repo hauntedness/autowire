@@ -48,7 +48,7 @@ func NewDIContext(conf ProcessConfigurer) *DIContext {
 
 func (di *DIContext) Process(path string) {
 	pkg := loadPackage(path)
-	di.pkgs[path] = pkg
+	di.pkgs[pkg.PkgPath] = pkg
 	// parse
 	config := &LoadConfig{
 		LoadMode: LoadProvider | LoadInjector,
@@ -64,7 +64,8 @@ func (di *DIContext) Process(path string) {
 // doInject process each injector,
 func (di *DIContext) doInject() {
 	for _, inj := range di.injectors {
-		// here mean all required is provided
+		// until all required is provided
+		// while it is possible that some providers miss
 		for range [1000]struct{}{} {
 			m := inj.Require()
 			if len(m) == 0 {
@@ -93,12 +94,14 @@ func (di *DIContext) doInject() {
 }
 
 func (di *DIContext) refactor() {
+	refactored := map[string]bool{}
 	for _, file := range di.files {
 		file.Refactor()
+		refactored[file.Package()] = true
 	}
 	for path, pkg := range di.pkgs {
-		if di.conf.WillRewriteSource() {
-			logs.Debug("saving package", "package", path)
+		if di.conf.WillRewriteSource() && refactored[path] {
+			logs.Info("saving package", "package", path)
 			err := pkg.Save()
 			if err != nil {
 				panic(err)

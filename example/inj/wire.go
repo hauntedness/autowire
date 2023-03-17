@@ -19,7 +19,7 @@ func NewShu(liu *liu.Liu, zhao *zhao.Zhao) *Shu {
 
 // hahaha
 func InitShu() *Shu {
-	wire.Build(NewShu, liu.NewLiu, zhao.NewZhao, yanyan.NewYanYan, guan.NewGuan, zhang.NewZhang)
+	wire.Build(NewShu, zhang.NewZhang, yanyan.NewYanYan, zhao.NewZhao, liu.NewLiu, guan.NewGuan)
 	return nil
 }
 

@@ -4,7 +4,7 @@ import (
 	"go/types"
 )
 
-func matchObject(obj types.Object) {
+func MatchObject(obj types.Object) {
 	switch obj.(type) {
 	case *types.Func:
 	case *types.TypeName:
@@ -13,7 +13,7 @@ func matchObject(obj types.Object) {
 	}
 }
 
-func matchType(typ types.Type) {
+func MatchType(typ types.Type) {
 	switch typ.(type) {
 	case *types.Named:
 	case *types.Interface:

@@ -20,12 +20,14 @@ type (
 )
 
 type WireFile struct {
+	pkg       string
 	file      *dst.File
 	injectors map[injectId]*Injector
 }
 
-func NewFile(dstFile *dst.File) *WireFile {
+func NewFile(dstFile *dst.File, pkg string) *WireFile {
 	return &WireFile{
+		pkg:       pkg,
 		file:      dstFile,
 		injectors: map[string]*Injector{},
 	}
@@ -35,6 +37,10 @@ func (file *WireFile) AddInjector(list ...*Injector) {
 	for _, inj := range list {
 		file.injectors[inj.fn.String()] = inj
 	}
+}
+
+func (file *WireFile) Package() string {
+	return file.pkg
 }
 
 func (file *WireFile) Imports() []*dst.ImportSpec {
