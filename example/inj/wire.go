@@ -4,11 +4,11 @@ package inj
 
 import (
 	"github.com/google/wire"
-	"github.com/huantedness/autowire/example/inj/guan"
-	"github.com/huantedness/autowire/example/inj/liu"
-	"github.com/huantedness/autowire/example/inj/zhang"
-	"github.com/huantedness/autowire/example/inj/zhang/yanyan"
-	"github.com/huantedness/autowire/example/inj/zhao"
+	"github.com/hauntedness/autowire/example/inj/guan"
+	"github.com/hauntedness/autowire/example/inj/liu"
+	"github.com/hauntedness/autowire/example/inj/zhang"
+	"github.com/hauntedness/autowire/example/inj/zhang/yanyan"
+	"github.com/hauntedness/autowire/example/inj/zhao"
 )
 
 type Shu struct{}

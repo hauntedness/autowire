@@ -1,6 +1,6 @@
 package zhang
 
-import "github.com/huantedness/autowire/example/inj/zhang/yanyan"
+import "github.com/hauntedness/autowire/example/inj/zhang/yanyan"
 
 type Zhang struct{}
 
