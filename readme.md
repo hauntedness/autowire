@@ -35,8 +35,8 @@ package inj
 
 import (
 	"github.com/google/wire"
-	"github.com/huantedness/autowire/example/inj/liu"
-	"github.com/huantedness/autowire/example/inj/zhao"
+	"github.com/hauntedness/autowire/example/inj/liu"
+	"github.com/hauntedness/autowire/example/inj/zhao"
 )
 
 type Shu struct{}
@@ -71,11 +71,11 @@ package inj
 
 import (
 	"github.com/google/wire"
-	"github.com/huantedness/autowire/example/inj/guan"
-	"github.com/huantedness/autowire/example/inj/liu"
-	"github.com/huantedness/autowire/example/inj/zhang"
-	"github.com/huantedness/autowire/example/inj/zhang/yanyan"
-	"github.com/huantedness/autowire/example/inj/zhao"
+	"github.com/hauntedness/autowire/example/inj/guan"
+	"github.com/hauntedness/autowire/example/inj/liu"
+	"github.com/hauntedness/autowire/example/inj/zhang"
+	"github.com/hauntedness/autowire/example/inj/zhang/yanyan"
+	"github.com/hauntedness/autowire/example/inj/zhao"
 )
 
 type Shu struct{}
@@ -97,4 +97,4 @@ Current limitation
 - The code completion only works for the function provider, A workaround is manually create a function 
 - By default, autowire only treat functions like NewXXX() bean as a valid provider
 - Autowire also have a default algrithim to pick provider from multiple matches.
-- If the default behavior is not what you need, you can replace it with your own implementation. see github.com/huantedness/autowire/pkg.ProcessConfigurer.
+- If the default behavior is not what you need, you can replace it with your own implementation. see github.com/hauntedness/autowire/pkg.ProcessConfigurer.

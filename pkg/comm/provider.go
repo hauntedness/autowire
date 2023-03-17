@@ -3,7 +3,7 @@ package comm
 import (
 	"go/types"
 
-	"github.com/huantedness/autowire/logs"
+	"github.com/hauntedness/autowire/logs"
 )
 
 type Provider struct {

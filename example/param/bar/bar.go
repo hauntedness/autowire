@@ -1,6 +1,6 @@
 package bar
 
-import "github.com/huantedness/autowire/example/param"
+import "github.com/hauntedness/autowire/example/param"
 
 type Bar struct{}
 

@@ -8,8 +8,8 @@ import (
 
 	"github.com/dave/dst"
 	"github.com/dave/dst/decorator"
-	"github.com/huantedness/autowire/conf"
-	"github.com/huantedness/autowire/pkg/util"
+	"github.com/hauntedness/autowire/conf"
+	"github.com/hauntedness/autowire/pkg/util"
 	"golang.org/x/exp/slog"
 )
 
@@ -116,12 +116,12 @@ func TestWireFile_Refactor(t *testing.T) {
 
 // newShuInjector load inj.NewShu and package of inj.NewShu
 func newShuInjector(t *testing.T) (injPkg *decorator.Package, guanPkg *decorator.Package, inj *Injector) {
-	path := "github.com/huantedness/autowire/example/inj"
+	path := "github.com/hauntedness/autowire/example/inj"
 	pkgs, err := decorator.Load(conf.DefaultConf, path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	path_guan := "github.com/huantedness/autowire/example/inj/guan"
+	path_guan := "github.com/hauntedness/autowire/example/inj/guan"
 	pkg_guan, err := decorator.Load(conf.DefaultConf, path_guan)
 	if err != nil {
 		t.Fatal(err)

@@ -8,7 +8,7 @@ import (
 
 func TestDIContext_Process(t *testing.T) {
 	di := NewDIContext(nil)
-	path := "github.com/huantedness/autowire/example"
+	path := "github.com/hauntedness/autowire/example"
 	di.Process(path)
 
 	assert.NotEmpty(t, di.providers)
@@ -26,7 +26,7 @@ func TestDIContext_Process(t *testing.T) {
 // test complex dependencies, to see yanyan which is in very underlayer can be enriched
 func TestDIContext_Process2(t *testing.T) {
 	di := NewDIContext(nil)
-	path := "github.com/huantedness/autowire/example/inj"
+	path := "github.com/hauntedness/autowire/example/inj"
 	di.Process(path)
 
 	assert.NotEmpty(t, di.providers)

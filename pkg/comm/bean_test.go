@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/dave/dst/decorator"
-	"github.com/huantedness/autowire/conf"
+	"github.com/hauntedness/autowire/conf"
 )
 
 func TestBean_Identical(t *testing.T) {
@@ -21,7 +21,7 @@ func TestBean_Identical(t *testing.T) {
 }
 
 func prepareBean(t *testing.T) *Bean {
-	pkgs, err := decorator.Load(conf.DefaultConf, "github.com/huantedness/autowire/example/param/bar")
+	pkgs, err := decorator.Load(conf.DefaultConf, "github.com/hauntedness/autowire/example/param/bar")
 	if err != nil {
 		t.Fatal(err)
 	}

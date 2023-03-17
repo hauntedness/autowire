@@ -5,7 +5,7 @@ import (
 	"go/types"
 	"strings"
 
-	"github.com/huantedness/autowire/pkg/comm"
+	"github.com/hauntedness/autowire/pkg/comm"
 	"golang.org/x/exp/slices"
 )
 

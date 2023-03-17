@@ -2,8 +2,8 @@ package pkg
 
 import (
 	"github.com/dave/dst/decorator"
-	"github.com/huantedness/autowire/logs"
-	"github.com/huantedness/autowire/pkg/comm"
+	"github.com/hauntedness/autowire/logs"
+	"github.com/hauntedness/autowire/pkg/comm"
 )
 
 type DIContext struct {

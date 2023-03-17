@@ -7,9 +7,9 @@ import (
 
 	"github.com/dave/dst"
 	"github.com/dave/dst/decorator"
-	"github.com/huantedness/autowire/conf"
-	"github.com/huantedness/autowire/pkg/comm"
-	"github.com/huantedness/autowire/pkg/util"
+	"github.com/hauntedness/autowire/conf"
+	"github.com/hauntedness/autowire/pkg/comm"
+	"github.com/hauntedness/autowire/pkg/util"
 )
 
 // load package by path

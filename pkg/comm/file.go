@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/dave/dst"
-	"github.com/huantedness/autowire/logs"
-	"github.com/huantedness/autowire/pkg/util"
+	"github.com/hauntedness/autowire/logs"
+	"github.com/hauntedness/autowire/pkg/util"
 	"golang.org/x/exp/slices"
 )
 

@@ -5,17 +5,17 @@ import (
 	"testing"
 
 	"github.com/dave/dst/decorator"
-	"github.com/huantedness/autowire/conf"
+	"github.com/hauntedness/autowire/conf"
 	"golang.org/x/exp/slog"
 )
 
 func TestInjector_Need(t *testing.T) {
-	path := "github.com/huantedness/autowire/example/inj"
+	path := "github.com/hauntedness/autowire/example/inj"
 	pkgs, err := decorator.Load(conf.DefaultConf, path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	path_guan := "github.com/huantedness/autowire/example/inj/guan"
+	path_guan := "github.com/hauntedness/autowire/example/inj/guan"
 	pkg_guan, err := decorator.Load(conf.DefaultConf, path_guan)
 	if err != nil {
 		t.Fatal(err)

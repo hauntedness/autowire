@@ -4,13 +4,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/huantedness/autowire/logs"
-	"github.com/huantedness/autowire/pkg"
+	"github.com/hauntedness/autowire/logs"
+	"github.com/hauntedness/autowire/pkg"
 	"golang.org/x/exp/slog"
 )
 
 func main() {
-	path := `C:\Users\huantedness\NvimProjects\goprojects\autowire\example\inj`
+	path := `C:\Users\hauntedness\NvimProjects\goprojects\autowire\example\inj`
 	err := os.Chdir(path)
 	if err != nil {
 		panic(err)

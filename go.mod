@@ -1,4 +1,4 @@
-module github.com/huantedness/autowire
+module github.com/hauntedness/autowire
 
 go 1.19
 

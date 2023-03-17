@@ -4,7 +4,7 @@ package example
 
 import (
 	"github.com/google/wire"
-	"github.com/huantedness/autowire/example/msg"
+	"github.com/hauntedness/autowire/example/msg"
 )
 
 type Event struct {
