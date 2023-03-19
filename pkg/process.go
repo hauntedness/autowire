@@ -47,10 +47,13 @@ func (di *DIContext) doInject() {
 	for _, inj := range di.injectors {
 		// until all required is provided
 		// while it is possible that some providers miss
-		for range [1000]struct{}{} {
+		for i := range [1000]struct{}{} {
 			m := inj.Require()
 			if len(m) == 0 {
 				break
+			}
+			if i == 999 {
+				logs.Warn("still could not find privder after trying many times", "round", i)
 			}
 			for _, bean := range m {
 				path := bean.PkgPath()

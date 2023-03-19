@@ -173,21 +173,23 @@ func renamed(bm util.BiMap[path, alias], path path, name alias) alias {
 	if length := len(words); length > 1 {
 		secondLast = []byte(strings.ToLower(words[length-2]))
 		for i := range secondLast {
-			if secondLast[i] >= 'a' && secondLast[i] <= 'z' || i > 0 && secondLast[i] >= '0' && secondLast[i] <= '9' {
+			if secondLast[i] >= 'a' && secondLast[i] <= 'z' {
+				continue
+			} else if i > 0 && secondLast[i] >= '0' && secondLast[i] <= '9' {
 				continue
 			} else {
 				secondLast[i] = '_'
 			}
 		}
 	}
-
+	newAlias := alias(secondLast) + name
+	if _, ok := bm.GetByR(newAlias); !ok {
+		return newAlias
+	}
 	for i := range [255]struct{}{} {
-		newAlias := append([]byte(string(secondLast)), name...)
-		if i > 0 {
-			newAlias = append(newAlias, []byte(strconv.Itoa(i))...)
-		}
-		if _, ok := bm.GetByR(alias(newAlias)); !ok {
-			return alias(newAlias)
+		newAlias = newAlias + strconv.Itoa(i+1)
+		if _, ok := bm.GetByR(newAlias); !ok {
+			return newAlias
 		}
 	}
 	panic(fmt.Errorf("fail to rename path after trying many times: %s", path))
