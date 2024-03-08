@@ -1,6 +1,6 @@
 module github.com/hauntedness/autowire
 
-go 1.20
+go 1.22
 
 require (
 	github.com/google/wire v0.6.0
