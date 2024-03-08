@@ -1,14 +1,15 @@
 package comm
 
 import (
+	"cmp"
 	"fmt"
 	"go/token"
 	"go/types"
+	"log/slog"
 	"strconv"
 	"strings"
 
 	"github.com/dave/dst"
-	"github.com/hauntedness/autowire/logs"
 	"github.com/hauntedness/autowire/pkg/util"
 	"golang.org/x/exp/slices"
 )
@@ -52,7 +53,7 @@ func (file *WireFile) Refactor() {
 	defer func() {
 		// rewrite dst file with new imports
 		file.organizeImports(origin, current)
-		logs.Debug("package refactored", "origin imports", origin, "current imports", current)
+		slog.Debug("package refactored", "origin imports", origin, "current imports", current)
 	}()
 	// for each refactor pointcut
 	for _, inj := range file.injectors {
@@ -93,8 +94,8 @@ declarations:
 	for k, v := range current.LMap() {
 		pairs = append(pairs, pair{k, v})
 	}
-	slices.SortFunc(pairs, func(p1, p2 pair) bool {
-		return p1[0] < p2[0]
+	slices.SortFunc(pairs, func(p1, p2 pair) int {
+		return cmp.Compare(p1[0], p2[0])
 	})
 	for _, v := range pairs {
 		path := v[0]
@@ -126,7 +127,7 @@ func (file *WireFile) collectImports() (origin util.BiMap[path, alias], current 
 	current = util.NewBiMap[path, alias]()
 	for i, is := range file.file.Imports {
 		var name string
-		logs.Debug(
+		slog.Debug(
 			"import path",
 			"index", i,
 			"name", is.Name,

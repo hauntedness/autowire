@@ -1,8 +1,9 @@
 package pkg
 
 import (
+	"log/slog"
+
 	"github.com/dave/dst/decorator"
-	"github.com/hauntedness/autowire/logs"
 	"github.com/hauntedness/autowire/pkg/comm"
 )
 
@@ -53,7 +54,7 @@ func (di *DIContext) doInject() {
 				break
 			}
 			if i == 999 {
-				logs.Warn("still could not find privder after trying many times", "round", i)
+				slog.Warn("still could not find privder after trying many times", "round", i)
 			}
 			for _, bean := range m {
 				path := bean.PkgPath()
@@ -85,7 +86,7 @@ func (di *DIContext) refactor() {
 	}
 	for path, pkg := range di.pkgs {
 		if di.conf.WillRewriteSource() && refactored[path] {
-			logs.Info("saving package", "package", path)
+			slog.Info("saving package", "package", path)
 			err := pkg.Save()
 			if err != nil {
 				panic(err)

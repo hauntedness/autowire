@@ -2,8 +2,7 @@ package comm
 
 import (
 	"go/types"
-
-	"github.com/hauntedness/autowire/logs"
+	"log/slog"
 )
 
 type Provider struct {
@@ -15,7 +14,6 @@ func NewProvider(fn *types.Func) *Provider {
 }
 
 func (p *Provider) Require() []*Bean {
-	type BeanId = string
 	ret := make([]*Bean, 0, 3)
 	params := p.fn.Type().(*types.Signature).Params()
 	for i := range make([]struct{}, params.Len()) {
@@ -69,7 +67,7 @@ func (p *Provider) fromVar(v *types.Var) *Bean {
 		bean := &Bean{pkg: p.fn.Pkg().Path(), typ: typ}
 		return bean
 	default:
-		logs.Warn("something should not happen!", "type", typ)
+		slog.Warn("something should not happen!", "type", typ)
 		panic(typ)
 	}
 }

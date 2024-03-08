@@ -46,16 +46,14 @@ func (*DefaultProcessConfigurer) ProviderElect(inj *comm.Injector, bean *comm.Be
 			secondSequence = append(secondSequence, p)
 		}
 	}
-	sortFunc := func(prev, next *comm.Provider) bool {
+	sortFunc := func(prev, next *comm.Provider) int {
 		if len(prev.Require()) > len(next.Require()) {
-			return true
+			return -1
 		}
 		if prev.Name() < next.Name() {
-			return true
+			return -1
 		}
-		// TODO maybe we should use some go directive to indicate the order
-		// while current problem is go doesn't support that very well
-		return false
+		return 1
 	}
 	if len(firstSequence) > 0 {
 		slices.SortFunc(firstSequence, sortFunc)
@@ -65,11 +63,23 @@ func (*DefaultProcessConfigurer) ProviderElect(inj *comm.Injector, bean *comm.Be
 		slices.SortFunc(secondSequence, sortFunc)
 		return secondSequence[0]
 	}
-	panic(fmt.Errorf("no provider given")) // not reachable code or this will be treated as a bug
+	panic(fmt.Errorf("no provider given, bean: %v", bean.String())) // not reachable code or this will be treated as a bug
 }
 
 // ProviderPredicate implements ProcessConfigurer
 func (*DefaultProcessConfigurer) ProviderPredicate(fn *types.Func) bool {
+	sig, ok := fn.Type().(*types.Signature)
+	if !ok {
+		return false
+	}
+	params := sig.Params()
+	for i := 0; i < params.Len(); i++ {
+		param := params.At(i)
+		typ := param.Origin().Type()
+		if !satisfyBeanDefinition(typ) {
+			return false
+		}
+	}
 	return strings.HasPrefix(fn.Name(), "New")
 }
 
@@ -79,3 +89,25 @@ func (c *DefaultProcessConfigurer) WillRewriteSource() bool {
 }
 
 var _ ProcessConfigurer = (*DefaultProcessConfigurer)(nil)
+
+func satisfyBeanDefinition(v types.Type) bool {
+	switch typ := v.(type) {
+	case *types.Named:
+		return true
+	case *types.Interface:
+		return true
+	case *types.Pointer:
+		return satisfyBeanDefinition(deref(typ))
+	case *types.Struct:
+		return true
+	default:
+		return false
+	}
+}
+
+func deref(typ types.Type) types.Type {
+	if t, ok := typ.(*types.Pointer); ok {
+		return deref(t.Elem())
+	}
+	return typ
+}
