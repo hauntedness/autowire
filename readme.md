@@ -62,7 +62,7 @@ Or run go tool
 go run github.com/hauntedness/autowire/cmd/autowire@latest
 ```
 
-Now you should see the code is refacted.
+Now you should see the code is refactored.
 
 ```go
 //go:build wireinject
@@ -96,5 +96,5 @@ Current limitation
 
 - The code completion only works for the function provider, A workaround is manually create a function 
 - By default, autowire only treat functions like NewXXX() bean as a valid provider
-- Autowire also have a default algrithim to pick provider from multiple matches.
+- Autowire also have a default algorithm to pick provider from multiple matches.
 - If the default behavior is not what you need, you can replace it with your own implementation. see github.com/hauntedness/autowire/pkg.ProcessConfigurer.
