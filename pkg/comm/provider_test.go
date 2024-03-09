@@ -6,7 +6,6 @@ import (
 
 	"github.com/dave/dst/decorator"
 	"github.com/hauntedness/autowire/conf"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestFromVar(t *testing.T) {
@@ -25,18 +24,24 @@ func TestFromVar(t *testing.T) {
 	}
 	p := Provider{fn: handle}
 	beans := p.Require()
-	assert.Equal(t, InterfaceKind, beans[0].Kind())
-	assert.Equal(t, "github.com/hauntedness/autowire/example/param", beans[0].PkgPath())
-	assert.Equal(t, "github.com/hauntedness/autowire/example/param.Foo", beans[0].String())
-	assert.Equal(t, PointerKind, beans[1].Kind())
-	assert.Equal(t, "github.com/hauntedness/autowire/example/param", beans[1].PkgPath())
-	assert.Equal(t, "*github.com/hauntedness/autowire/example/param.FooImpl", beans[1].String())
-	assert.Equal(t, StructKind, beans[2].Kind())
-	assert.Equal(t, "github.com/hauntedness/autowire/example/param/bar", beans[2].PkgPath())
-	assert.Equal(t, "github.com/hauntedness/autowire/example/param/bar.Bar", beans[2].String())
+	assertEqual(t, InterfaceKind, beans[0].Kind())
+	assertEqual(t, "github.com/hauntedness/autowire/example/param", beans[0].PkgPath())
+	assertEqual(t, "github.com/hauntedness/autowire/example/param.Foo", beans[0].String())
+	assertEqual(t, PointerKind, beans[1].Kind())
+	assertEqual(t, "github.com/hauntedness/autowire/example/param", beans[1].PkgPath())
+	assertEqual(t, "*github.com/hauntedness/autowire/example/param.FooImpl", beans[1].String())
+	assertEqual(t, StructKind, beans[2].Kind())
+	assertEqual(t, "github.com/hauntedness/autowire/example/param/bar", beans[2].PkgPath())
+	assertEqual(t, "github.com/hauntedness/autowire/example/param/bar.Bar", beans[2].String())
 	// only for test purpose, error should not be a valid bean
 	bean := p.Provide()
-	assert.Equal(t, InterfaceKind, bean.Kind())
-	assert.Equal(t, "", bean.PkgPath())
-	assert.Equal(t, "error", bean.String())
+	assertEqual(t, InterfaceKind, bean.Kind())
+	assertEqual(t, "", bean.PkgPath())
+	assertEqual(t, "error", bean.String())
+}
+
+func assertEqual[T comparable](t *testing.T, expected T, actual T) {
+	if expected != actual {
+		t.Errorf("value are not equal, expected: %v, actual: %v", expected, actual)
+	}
 }

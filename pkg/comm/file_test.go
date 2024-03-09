@@ -10,7 +10,7 @@ import (
 	"github.com/dave/dst/decorator"
 	"github.com/hauntedness/autowire/conf"
 	"github.com/hauntedness/autowire/pkg/util"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 func Test_renamed(t *testing.T) {

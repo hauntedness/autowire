@@ -17,7 +17,8 @@ func NewShu(liu *liu.Liu, zhao *zhao.Zhao) *Shu {
 	return &Shu{}
 }
 
+//go:generate autowire
 func InitShu() *Shu {
-	wire.Build(NewShu, yanyan.NewYanYan, liu.NewLiu, zhao.NewZhao, guan.NewGuan, zhang.NewZhang)
+	wire.Build(NewShu, liu.NewLiu, zhao.NewZhao, guan.NewGuan, zhang.NewZhang, yanyan.NewYanYan)
 	return nil
 }

@@ -3,10 +3,10 @@ package pkg
 import (
 	"fmt"
 	"go/types"
+	"slices"
 	"strings"
 
 	"github.com/hauntedness/autowire/pkg/comm"
-	"golang.org/x/exp/slices"
 )
 
 // optional config when processing autowire

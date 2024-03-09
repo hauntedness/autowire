@@ -2,11 +2,11 @@ package comm
 
 import (
 	"go/types"
+	"log/slog"
 	"testing"
 
 	"github.com/dave/dst/decorator"
 	"github.com/hauntedness/autowire/conf"
-	"golang.org/x/exp/slog"
 )
 
 func TestInjector_Need(t *testing.T) {

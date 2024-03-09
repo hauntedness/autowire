@@ -40,8 +40,9 @@ func NewInjector(fn *types.Func, origin map[FuncId]*Provider, buildCall *dst.Cal
 //	if provider P in Injector I provide Bean B, then I does not require B
 //	else if No provider provide B, the injector I require B.
 func (inj *Injector) Require() map[BeanId]*Bean {
-	p := &Provider{fn: inj.fn}
-	bean := p.Provide()
+	want := &Provider{fn: inj.fn}
+	// here we know that bean is the result of the injector
+	bean, found := want.Provide(), false
 	required := make(map[BeanId]*Bean)
 	owned := make(map[BeanId]*Bean)
 	for _, p := range inj.providers {
@@ -50,11 +51,11 @@ func (inj *Injector) Require() map[BeanId]*Bean {
 		}
 		b := p.Provide()
 		owned[b.String()] = b
-		if bean != nil && b.Identical(bean) {
-			bean = nil
+		if !found && b.Identical(bean) {
+			found = true
 		}
 	}
-	if bean != nil {
+	if !found {
 		err := fmt.Errorf("error: the injector func need %v, the corresponding provider should be in wire.Build func", bean.String())
 		panic(err)
 	}

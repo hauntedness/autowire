@@ -6,12 +6,12 @@ import (
 	"go/token"
 	"go/types"
 	"log/slog"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/dave/dst"
 	"github.com/hauntedness/autowire/pkg/util"
-	"golang.org/x/exp/slices"
 )
 
 type (

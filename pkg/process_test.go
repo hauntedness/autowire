@@ -3,7 +3,7 @@ package pkg
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/hauntedness/autowire/pkg/comm"
 )
 
 func TestDIContext_Process(t *testing.T) {
@@ -11,16 +11,16 @@ func TestDIContext_Process(t *testing.T) {
 	path := "github.com/hauntedness/autowire/example"
 	di.Process(path)
 
-	assert.NotEmpty(t, di.providers)
+	assertNotEmpty[*comm.Provider](t, di.providers)
 	provider := di.providers[objRef{importPath: path, name: "NewEvent"}]
-	assert.NotNil(t, provider)
+	assertNotNil(t, provider)
 
 	provider2 := di.providers[objRef{importPath: path + "/msg", name: "NewMessage"}]
-	assert.NotNil(t, provider2)
+	assertNotNil(t, provider2)
 
-	assert.NotEmpty(t, di.injectors)
+	assertNotEmpty[*comm.Injector](t, di.injectors)
 	injector := di.injectors[objRef{importPath: path, name: "InitEvent"}]
-	assert.NotNil(t, injector)
+	assertNotNil(t, injector)
 }
 
 // test complex dependencies, to see yanyan which is in very underlayer can be enriched
@@ -29,17 +29,29 @@ func TestDIContext_Process2(t *testing.T) {
 	path := "github.com/hauntedness/autowire/example/inj"
 	di.Process(path)
 
-	assert.NotEmpty(t, di.providers)
+	assertNotEmpty[*comm.Provider](t, di.providers)
 	provider := di.providers[objRef{importPath: path, name: "NewShu"}]
-	assert.NotNil(t, provider)
+	assertNotNil(t, provider)
 
 	provider2 := di.providers[objRef{importPath: path + "/liu", name: "NewLiu"}]
-	assert.NotNil(t, provider2)
+	assertNotNil(t, provider2)
 
 	provider3 := di.providers[objRef{importPath: path + "/zhang/yanyan", name: "NewYanYan"}]
-	assert.NotNil(t, provider3)
+	assertNotNil(t, provider3)
 
-	assert.NotEmpty(t, di.injectors)
+	assertNotEmpty[*comm.Injector](t, di.injectors)
 	injector := di.injectors[objRef{importPath: path, name: "InitShu"}]
-	assert.NotNil(t, injector)
+	assertNotNil(t, injector)
+}
+
+func assertNotEmpty[E any, T ~[]E | ~map[objRef]E](t *testing.T, collect T) {
+	if len(collect) == 0 {
+		t.Fatalf("expecting not empty, got empty")
+	}
+}
+
+func assertNotNil[E any, PE *E](t *testing.T, obj PE) {
+	if obj == nil {
+		t.Fatalf("expecting not nil, got nil")
+	}
 }

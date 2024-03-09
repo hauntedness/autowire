@@ -55,6 +55,7 @@ func (di *DIContext) doInject() {
 			}
 			if i == 999 {
 				slog.Warn("still could not find privder after trying many times", "round", i)
+				break
 			}
 			for _, bean := range m {
 				path := bean.PkgPath()
